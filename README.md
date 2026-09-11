@@ -1,7 +1,7 @@
 # Portfolio
 
 > Personal site — projects, bio, and contact.
-> Live at [portfolio-xxxx.vercel.app](https://portfolio-xxxx.vercel.app)
+> Live at [kirtanx3.vercel.app]
 
 ## About
 
@@ -20,7 +20,7 @@ HTML file that ships as-is.
 
 - **Student Hub** — Role-based academic platform with rotating QR
   attendance, GPS geofencing, and real-time chat.
-  [Live demo](https://kirtan-hub-git-main-kirtangayathri1214-1418.vercel.app)
+  [Live demo](https://kirtan-hub.vercel.app/)
 
 ## Contact
 
