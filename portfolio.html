@@ -4,7 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kirtan G — Software Engineer</title>
+<meta name="description" content="Kirtan G — From sensors to screens, I build what works. Portfolio, projects, and contact.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+
+<!-- Open Graph (link previews) -->
+<meta property="og:title" content="Kirtan G — Software Engineer">
+<meta property="og:description" content="From sensors to screens, I build what works.">
+<meta property="og:type" content="website">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -56,7 +63,6 @@ body {
   cursor: none;
 }
 
-/* Hide default cursor everywhere */
 a, button, .clickable { cursor: none; }
 
 @media (pointer: coarse) {
@@ -159,7 +165,6 @@ a, button, .clickable { cursor: none; }
   50% { transform: translate(-40%, -60%) scale(1.2); }
 }
 
-/* Noise texture overlay */
 .bg-orbs::after {
   content: '';
   position: absolute;
@@ -284,6 +289,13 @@ a, button, .clickable { cursor: none; }
   margin-bottom: 24px;
   width: fit-content;
   animation: fadeUp 0.6s ease both;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.hero-badge:hover {
+  border-color: var(--accent);
+  color: var(--text);
 }
 
 .hero-badge .pulse {
@@ -331,7 +343,6 @@ a, button, .clickable { cursor: none; }
   font-weight: 600;
 }
 
-/* Typing effect line */
 .hero .typing-line {
   font-family: var(--mono);
   font-size: clamp(13px, 1.6vw, 15px);
@@ -404,7 +415,6 @@ a, button, .clickable { cursor: none; }
   transform: translateY(-2px);
 }
 
-/* Social strip */
 .socials {
   display: flex;
   gap: 16px;
@@ -493,7 +503,6 @@ section {
   max-width: 560px;
 }
 
-/* Reveal on scroll */
 .reveal {
   opacity: 0;
   transform: translateY(30px);
@@ -825,7 +834,6 @@ footer {
 
 footer .heart { color: var(--accent); }
 
-/* ========== SCROLLBAR ========== */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb {
@@ -837,18 +845,15 @@ footer .heart { color: var(--accent); }
 </head>
 <body>
 
-<!-- Custom cursor -->
 <div class="cursor-dot" id="cursorDot"></div>
 <div class="cursor-ring" id="cursorRing"></div>
 
-<!-- Background orbs -->
 <div class="bg-orbs">
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
 </div>
 
-<!-- Navbar -->
 <nav class="nav">
   <span class="nav-logo">kirtan.dev</span>
   <div class="nav-links">
@@ -859,17 +864,16 @@ footer .heart { color: var(--accent); }
   <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
 </nav>
 
-<!-- Hero -->
 <header class="hero">
   <div class="container">
-    <div class="hero-badge">
+    <a href="#contact" class="hero-badge">
       <span class="pulse"></span>
-      Available for work
-    </div>
+      Open to opportunities
+    </a>
 
     <h1>
       Kirtan G<br>
-      <span class="gradient">builds things<br>that work.</span>
+      <span class="gradient">from sensors<br>to screens,<br>I build what works.</span>
     </h1>
 
     <div class="typing-line">
@@ -878,9 +882,10 @@ footer .heart { color: var(--accent); }
     </div>
 
     <p class="subtitle">
-      Full-stack developer shipping <strong>real-time web apps</strong> — Firebase in the back,
-      hand-tuned CSS up front. Currently building <strong>Student Hub</strong>, a
-      role-based academic platform with geofenced QR attendance and live chat.
+      Driven by curiosity, I build things that bridge <strong>hardware logic</strong>
+      with <strong>compelling visual media</strong>. Whether designing an IoT system,
+      developing software, or storyboarding a cinematic sequence — I care about how
+      things work under the hood, and how they feel to the end user.
     </p>
 
     <div class="hero-cta">
@@ -895,17 +900,16 @@ footer .heart { color: var(--accent); }
       <a href="https://github.com/Kirtanx3" target="_blank" rel="noopener" aria-label="GitHub">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>
       </a>
-      <a href="https://linkedin.com/in/kirtan-g" target="_blank" rel="noopener" aria-label="LinkedIn">
+      <a href="https://www.linkedin.com/in/kirtan-g-93b215352" target="_blank" rel="noopener" aria-label="LinkedIn">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 2h-17A1.5 1.5 0 0 0 2 3.5v17A1.5 1.5 0 0 0 3.5 22h17a1.5 1.5 0 0 0 1.5-1.5v-17A1.5 1.5 0 0 0 20.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 1 1 8.3 6.5a1.78 1.78 0 0 1-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0 0 13 14.19a.66.66 0 0 0 0 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 0 1 2.7-1.4c1.55 0 3.36.86 3.36 3.66z"/></svg>
       </a>
-      <a href="mailto:hello@kirtan.dev" aria-label="Email">
+      <a href="mailto:kirtangayathri1214@gmail.com" aria-label="Email">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
       </a>
     </div>
   </div>
 </header>
 
-<!-- About -->
 <section id="about">
   <div class="container">
     <div class="section-header reveal">
@@ -916,19 +920,19 @@ footer .heart { color: var(--accent); }
     <div class="about-grid reveal">
       <div class="about-text">
         <p>
-          I'm a software engineer focused on <strong>building real-time, production-grade web applications</strong>
-          with modern but pragmatic tools. I prefer shipping working features over perfect abstractions —
-          every project I start has to solve an actual problem.
+          Driven by curiosity, I build things that bridge <strong>hardware logic</strong> with
+          <strong>compelling visual media</strong>. Whether I'm designing an automated IoT system,
+          developing software, or storyboarding a cinematic sequence — I care deeply about
+          <strong>how things work under the hood</strong>, and <strong>how they feel to the end user</strong>.
         </p>
         <p>
           My current project, <strong>Student Hub</strong>, is a role-based academic platform built with
-          <span class="code-inline">Firebase</span>, vanilla JavaScript, and zero build tooling.
-          It handles authentication, real-time chat, file uploads, and an anti-cheat attendance system
-          using rotating QR codes, GPS geofencing, and device fingerprinting.
+          <span class="code-inline">Firebase</span> and vanilla JavaScript — handling authentication,
+          real-time chat, file uploads, and an anti-cheat attendance system using rotating QR codes,
+          GPS geofencing, and device fingerprinting.
         </p>
         <p>
-          I care about <strong>code that doesn't break</strong>, interfaces that don't feel like templates,
-          and systems that hold up under real usage. If it's worth building, it's worth building properly.
+          I'm always looking to turn complex technical challenges into <strong>clean, accessible outcomes</strong>.
         </p>
       </div>
 
@@ -941,6 +945,7 @@ footer .heart { color: var(--accent); }
           <span class="chip">Auth</span>
           <span class="chip">HTML5</span>
           <span class="chip">CSS3</span>
+          <span class="chip">IoT</span>
           <span class="chip">REST APIs</span>
           <span class="chip">Web Crypto</span>
           <span class="chip">Geolocation</span>
@@ -952,7 +957,6 @@ footer .heart { color: var(--accent); }
   </div>
 </section>
 
-<!-- Projects -->
 <section id="projects">
   <div class="container">
     <div class="section-header reveal">
@@ -962,7 +966,6 @@ footer .heart { color: var(--accent); }
     </div>
 
     <div class="projects-grid">
-      <!-- Student Hub -->
       <div class="project-card reveal">
         <div class="project-header">
           <div class="project-title">
@@ -973,10 +976,9 @@ footer .heart { color: var(--accent); }
         </div>
 
         <p class="project-desc">
-          A role-based academic platform where students and teachers get completely
-          different experiences from the same login. Real-time chat, secure QR-code
-          attendance with GPS geofencing, profile management, and an anti-cheat system
-          designed to make attendance fraud practically impossible.
+          A role-based academic platform built around a real problem: how do you take
+          classroom attendance without it being trivially cheatable? Rotating QR codes,
+          GPS geofencing, device fingerprinting — plus real-time chat and profiles on top.
         </p>
 
         <div class="project-features">
@@ -1000,18 +1002,17 @@ footer .heart { color: var(--accent); }
         </div>
 
         <div class="project-links">
-          <a href="https://kirtan-hub-git-main-kirtangayathri1214-1418.vercel.app" target="_blank" rel="noopener" class="link-primary">
+          <a href="https://kirtan-hub.vercel.app" target="_blank" rel="noopener" class="link-primary">
             Live Demo
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
           </a>
-          <a href="https://github.com/Kirtanx3" target="_blank" rel="noopener" class="link-ghost">
+          <a href="https://github.com/Kirtanx3/Student-Hub" target="_blank" rel="noopener" class="link-ghost">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>
             Source
           </a>
         </div>
       </div>
 
-      <!-- Next project placeholder -->
       <div class="project-card reveal" style="opacity: 0.7;">
         <div class="project-header">
           <div class="project-title">
@@ -1023,7 +1024,7 @@ footer .heart { color: var(--accent); }
 
         <p class="project-desc">
           Currently exploring ideas — likely something involving real-time data,
-          developer tooling, or another problem worth solving properly.
+          IoT, or another problem worth solving properly.
         </p>
 
         <div class="project-links">
@@ -1034,21 +1035,20 @@ footer .heart { color: var(--accent); }
   </div>
 </section>
 
-<!-- Contact -->
 <section id="contact">
   <div class="container">
     <div class="contact-card reveal">
       <h3>Let's build something</h3>
       <p>
-        Open to freelance, full-time roles, or interesting collaborations.
+        Open to internships, freelance, and interesting collaborations.
         Fastest way to reach me is email.
       </p>
       <div class="contact-links">
-        <a href="mailto:hello@kirtan.dev" class="btn btn-primary">
+        <a href="mailto:kirtangayathri1214@gmail.com" class="btn btn-primary">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
-          hello@kirtan.dev
+          Email me
         </a>
-        <a href="https://linkedin.com/in/kirtan-g" target="_blank" rel="noopener" class="btn btn-ghost">
+        <a href="https://www.linkedin.com/in/kirtan-g-93b215352" target="_blank" rel="noopener" class="btn btn-ghost">
           LinkedIn
         </a>
         <a href="https://github.com/Kirtanx3" target="_blank" rel="noopener" class="btn btn-ghost">
@@ -1061,7 +1061,7 @@ footer .heart { color: var(--accent); }
 
 <footer>
   <div class="container">
-    © 2026 Kirtan G · Built from scratch with <span class="heart">♥</span> and zero dependencies
+    © 2026 Kirtan G · Built from scratch <span class="heart">♥</span>
   </div>
 </footer>
 
@@ -1094,7 +1094,6 @@ document.addEventListener('mousemove', (e) => {
   cursorDot.style.top = mouseY + 'px';
 });
 
-// Smooth ring follow
 function animateRing() {
   ringX += (mouseX - ringX) * 0.15;
   ringY += (mouseY - ringY) * 0.15;
@@ -1104,7 +1103,6 @@ function animateRing() {
 }
 animateRing();
 
-// Hover state on interactive elements
 document.querySelectorAll('a, button, .project-card, .chip').forEach(el => {
   el.addEventListener('mouseenter', () => cursorRing.classList.add('hover'));
   el.addEventListener('mouseleave', () => cursorRing.classList.remove('hover'));
@@ -1115,10 +1113,10 @@ document.addEventListener('mouseup', () => cursorRing.classList.remove('click'))
 
 // ============ TYPING EFFECT ============
 const phrases = [
-  'shipping real-time web apps',
-  'building anti-cheat systems',
-  'writing code that doesn\'t break',
-  'designing interfaces that don\'t suck',
+  'bridging hardware & software',
+  'designing IoT systems',
+  'building software that feels right',
+  'turning complexity into clarity',
 ];
 const typedEl = document.getElementById('typed');
 let phraseIdx = 0, charIdx = 0, deleting = false;
