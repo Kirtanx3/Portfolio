@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kirtan G — Software Engineer</title>
-<meta name="description" content="Kirtan G — From sensors to screens, I build what works. Portfolio, projects, and contact.">
+<title>kirtan.dev</title>
+<meta name="description" content="From sensors to screens, I build what works.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 
-<!-- Open Graph (link previews) -->
-<meta property="og:title" content="Kirtan G — Software Engineer">
+<meta property="og:title" content="kirtan.dev">
 <meta property="og:description" content="From sensors to screens, I build what works.">
 <meta property="og:type" content="website">
 
@@ -38,18 +37,6 @@
   --mono: 'JetBrains Mono', monospace;
 }
 
-[data-theme="light"] {
-  --bg: #f7f7fb;
-  --bg-2: #ffffff;
-  --surface: rgba(0, 0, 0, 0.02);
-  --surface-hover: rgba(0, 0, 0, 0.04);
-  --border: rgba(0, 0, 0, 0.08);
-  --border-hover: rgba(0, 0, 0, 0.16);
-  --text: #0a0a12;
-  --text-dim: #4a4a5e;
-  --text-muted: #8a8a9e;
-}
-
 html { scroll-behavior: smooth; }
 
 body {
@@ -59,60 +46,9 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   min-height: 100vh;
-  transition: background 0.4s ease, color 0.4s ease;
-  cursor: none;
 }
 
-a, button, .clickable { cursor: none; }
-
-@media (pointer: coarse) {
-  body { cursor: auto; }
-  a, button { cursor: pointer; }
-  .cursor-dot, .cursor-ring { display: none; }
-}
-
-/* ========== CUSTOM CURSOR ========== */
-.cursor-dot,
-.cursor-ring {
-  position: fixed;
-  top: 0;
-  left: 0;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 10000;
-  will-change: transform;
-  mix-blend-mode: difference;
-}
-
-.cursor-dot {
-  width: 6px;
-  height: 6px;
-  background: #fff;
-  transform: translate(-50%, -50%);
-  transition: transform 0.05s ease;
-}
-
-.cursor-ring {
-  width: 34px;
-  height: 34px;
-  border: 1.5px solid #fff;
-  transform: translate(-50%, -50%);
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              height 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              background 0.25s ease,
-              transform 0.15s ease;
-}
-
-.cursor-ring.hover {
-  width: 60px;
-  height: 60px;
-  background: rgba(255, 255, 255, 0.15);
-  border-color: transparent;
-}
-
-.cursor-ring.click {
-  transform: translate(-50%, -50%) scale(0.85);
-}
+a, button { cursor: pointer; }
 
 /* ========== BACKGROUND ORBS ========== */
 .bg-orbs {
@@ -194,7 +130,7 @@ a, button, .clickable { cursor: none; }
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
-  padding: 10px 12px 10px 20px;
+  padding: 10px 20px;
   background: rgba(15, 15, 26, 0.65);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -204,10 +140,6 @@ a, button, .clickable { cursor: none; }
   align-items: center;
   gap: 24px;
   transition: all 0.3s ease;
-}
-
-[data-theme="light"] .nav {
-  background: rgba(255, 255, 255, 0.7);
 }
 
 .nav-logo {
@@ -240,28 +172,8 @@ a, button, .clickable { cursor: none; }
   background: var(--surface-hover);
 }
 
-.theme-toggle {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.theme-toggle:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-hover);
-  transform: rotate(20deg);
-}
-
 @media (max-width: 640px) {
-  .nav { gap: 12px; padding: 8px 8px 8px 16px; }
+  .nav { gap: 12px; padding: 8px 16px; }
   .nav-links a { padding: 6px 10px; font-size: 12px; }
   .nav-links a[href="#projects"] { display: none; }
 }
@@ -845,9 +757,6 @@ footer .heart { color: var(--accent); }
 </head>
 <body>
 
-<div class="cursor-dot" id="cursorDot"></div>
-<div class="cursor-ring" id="cursorRing"></div>
-
 <div class="bg-orbs">
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
@@ -861,7 +770,6 @@ footer .heart { color: var(--accent); }
     <a href="#projects">Projects</a>
     <a href="#contact">Contact</a>
   </div>
-  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
 </nav>
 
 <header class="hero">
@@ -1066,51 +974,6 @@ footer .heart { color: var(--accent); }
 </footer>
 
 <script>
-// ============ THEME ============
-const themeToggle = document.getElementById('themeToggle');
-const savedTheme = localStorage.getItem('theme') || 'dark';
-document.documentElement.setAttribute('data-theme', savedTheme);
-themeToggle.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
-
-themeToggle.addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-  themeToggle.textContent = next === 'dark' ? '🌙' : '☀️';
-});
-
-// ============ CUSTOM CURSOR ============
-const cursorDot = document.getElementById('cursorDot');
-const cursorRing = document.getElementById('cursorRing');
-
-let mouseX = 0, mouseY = 0;
-let ringX = 0, ringY = 0;
-
-document.addEventListener('mousemove', (e) => {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-  cursorDot.style.left = mouseX + 'px';
-  cursorDot.style.top = mouseY + 'px';
-});
-
-function animateRing() {
-  ringX += (mouseX - ringX) * 0.15;
-  ringY += (mouseY - ringY) * 0.15;
-  cursorRing.style.left = ringX + 'px';
-  cursorRing.style.top = ringY + 'px';
-  requestAnimationFrame(animateRing);
-}
-animateRing();
-
-document.querySelectorAll('a, button, .project-card, .chip').forEach(el => {
-  el.addEventListener('mouseenter', () => cursorRing.classList.add('hover'));
-  el.addEventListener('mouseleave', () => cursorRing.classList.remove('hover'));
-});
-
-document.addEventListener('mousedown', () => cursorRing.classList.add('click'));
-document.addEventListener('mouseup', () => cursorRing.classList.remove('click'));
-
 // ============ TYPING EFFECT ============
 const phrases = [
   'bridging hardware & software',
