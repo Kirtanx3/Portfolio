@@ -167,15 +167,20 @@ a, button { cursor: pointer; }
   transition: all 0.2s ease;
 }
 
-.nav-links a:hover {
+.nav-links a:hover,
+.nav-links a.active {
   color: var(--text);
   background: var(--surface-hover);
 }
 
+.nav-links a.active {
+  border: 1px solid var(--border-hover);
+}
+
 @media (max-width: 640px) {
   .nav { gap: 12px; padding: 8px 16px; }
-  .nav-links a { padding: 6px 10px; font-size: 12px; }
-  .nav-links a[href="#projects"] { display: none; }
+  .nav-links { gap: 4px; }
+  .nav-links a { padding: 6px 12px; font-size: 12px; }
 }
 
 /* ========== HERO ========== */
@@ -537,6 +542,27 @@ section {
   opacity: 1;
 }
 
+.project-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  background: radial-gradient(450px circle at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(167, 139, 250, 0.12), transparent 70%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.project-card:hover::after {
+  opacity: 1;
+}
+
+.project-card > * {
+  position: relative;
+  z-index: 2;
+}
+
 .project-header {
   display: flex;
   justify-content: space-between;
@@ -753,6 +779,30 @@ footer .heart { color: var(--accent); }
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+/* ========== COPY TOAST ========== */
+.copy-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(15, 15, 26, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  padding: 10px 22px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.35);
+  z-index: 9999;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.copy-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
 </style>
 </head>
 <body>
@@ -956,6 +1006,10 @@ footer .heart { color: var(--accent); }
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
           Email me
         </a>
+        <button type="button" class="btn btn-ghost" id="copyEmailBtn" style="display:inline-flex;align-items:center;gap:8px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          <span id="copyEmailText">Copy Email</span>
+        </button>
         <a href="https://www.linkedin.com/in/kirtan-g-93b215352" target="_blank" rel="noopener" class="btn btn-ghost">
           LinkedIn
         </a>
@@ -1016,18 +1070,75 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-// ============ PROJECT CARD TILT ============
+// ============ PROJECT CARD TILT & SPOTLIGHT ============
 document.querySelectorAll('.project-card').forEach(card => {
   card.addEventListener('mousemove', (e) => {
     const rect = card.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    card.style.transform = `translateY(-4px) perspective(1000px) rotateX(${-y * 3}deg) rotateY(${x * 3}deg)`;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const normX = (x / rect.width) - 0.5;
+    const normY = (y / rect.height) - 0.5;
+    card.style.transform = `translateY(-4px) perspective(1000px) rotateX(${-normY * 3}deg) rotateY(${normX * 3}deg)`;
+    card.style.setProperty('--mouse-x', `${x}px`);
+    card.style.setProperty('--mouse-y', `${y}px`);
   });
   card.addEventListener('mouseleave', () => {
     card.style.transform = '';
   });
 });
+
+// ============ COPY EMAIL TO CLIPBOARD ============
+const copyBtn = document.getElementById('copyEmailBtn');
+const copyText = document.getElementById('copyEmailText');
+const copyToast = document.getElementById('copyToast');
+
+if (copyBtn) {
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText('kirtangayathri1214@gmail.com');
+      if (copyText) copyText.textContent = 'Copied!';
+      if (copyToast) {
+        copyToast.classList.add('show');
+        setTimeout(() => {
+          copyToast.classList.remove('show');
+          setTimeout(() => {
+            if (copyText) copyText.textContent = 'Copy Email';
+          }, 300);
+        }, 2200);
+      }
+    } catch (e) {
+      window.location.href = 'mailto:kirtangayathri1214@gmail.com';
+    }
+  });
+}
+
+// ============ ACTIVE NAV SCROLL-SPY ============
+const navSections = document.querySelectorAll('section[id], header.hero');
+const navAnchorLinks = document.querySelectorAll('.nav-links a');
+
+window.addEventListener('scroll', () => {
+  let activeId = '';
+  const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+  
+  navSections.forEach(sec => {
+    const secTop = sec.offsetTop - 140;
+    const secHeight = sec.offsetHeight;
+    if (scrollY >= secTop && scrollY < secTop + secHeight) {
+      activeId = sec.getAttribute('id') || '';
+    }
+  });
+  
+  navAnchorLinks.forEach(link => {
+    link.classList.remove('active');
+    if (activeId && link.getAttribute('href') === `#${activeId}`) {
+      link.classList.add('active');
+    }
+  });
+}, { passive: true });
 </script>
+
+<div id="copyToast" class="copy-toast">
+  <span>📋 Email copied to clipboard!</span>
+</div>
 </body>
 </html>
