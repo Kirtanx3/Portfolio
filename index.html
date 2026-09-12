@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>kirtan.dev</title>
+<title>Kirtan G &mdash; IoT &amp; Full-Stack Developer</title>
 <meta name="description" content="From sensors to screens, I build what works.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 
-<meta property="og:title" content="kirtan.dev">
+<meta property="og:title" content="Kirtan G &mdash; IoT &amp; Full-Stack Developer">
 <meta property="og:description" content="From sensors to screens, I build what works.">
 <meta property="og:type" content="website">
 
@@ -178,7 +178,7 @@ a, button { cursor: pointer; }
 }
 
 @media (max-width: 640px) {
-  .nav { gap: 12px; padding: 8px 16px; }
+  .nav { gap: 8px; padding: 6px 14px; }
   .nav-links { gap: 4px; }
   .nav-links a { padding: 6px 12px; font-size: 12px; }
 }
@@ -803,6 +803,18 @@ footer .heart { color: var(--accent); }
   transform: translateX(-50%) translateY(0);
   opacity: 1;
 }
+
+/* ========== ACCESSIBILITY: REDUCED MOTION ========== */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .orb { animation: none !important; }
+  .hero-badge .pulse { animation: none !important; }
+  .status-live::before { animation: none !important; }
+  .hero .typing-line .caret { animation: none !important; }
+  .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .project-card { transition: none !important; transform: none !important; }
+  .btn, .socials a, .chip, .project-links a { transition: none !important; }
+}
 </style>
 </head>
 <body>
@@ -1071,21 +1083,25 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 // ============ PROJECT CARD TILT & SPOTLIGHT ============
-document.querySelectorAll('.project-card').forEach(card => {
-  card.addEventListener('mousemove', (e) => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const normX = (x / rect.width) - 0.5;
-    const normY = (y / rect.height) - 0.5;
-    card.style.transform = `translateY(-4px) perspective(1000px) rotateX(${-normY * 3}deg) rotateY(${normX * 3}deg)`;
-    card.style.setProperty('--mouse-x', `${x}px`);
-    card.style.setProperty('--mouse-y', `${y}px`);
+if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  document.querySelectorAll('.project-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const normX = (x / rect.width) - 0.5;
+      const normY = (y / rect.height) - 0.5;
+      card.style.transition = 'transform 0.1s ease-out, border-color 0.3s ease, box-shadow 0.3s ease';
+      card.style.transform = `translateY(-4px) perspective(1000px) rotateX(${-normY * 3}deg) rotateY(${normX * 3}deg)`;
+      card.style.setProperty('--mouse-x', `${x}px`);
+      card.style.setProperty('--mouse-y', `${y}px`);
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease';
+      card.style.transform = '';
+    });
   });
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = '';
-  });
-});
+}
 
 // ============ COPY EMAIL TO CLIPBOARD ============
 const copyBtn = document.getElementById('copyEmailBtn');

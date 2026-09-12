@@ -1,7 +1,7 @@
 # Portfolio
 
 > Personal site — projects, bio, and contact.
-> Live at [kirtanx3.vercel.app]
+> Live at [kirtanx3.vercel.app](https://kirtanx3.vercel.app)
 
 ## About
 
