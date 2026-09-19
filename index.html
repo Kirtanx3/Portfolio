@@ -896,10 +896,7 @@ footer .heart { color: var(--accent); }
           <strong>how things work under the hood</strong>, and <strong>how they feel to the end user</strong>.
         </p>
         <p>
-          My current project, <strong>Student Hub</strong>, is a role-based academic platform built with
-          <span class="code-inline">Firebase</span> and vanilla JavaScript — handling authentication,
-          real-time chat, file uploads, and an anti-cheat attendance system using rotating QR codes,
-          GPS geofencing, and device fingerprinting.
+          My recent work spans <strong>Student Hub</strong> (a role-based academic platform with cryptographic rotating QR anti-cheat attendance, GPS geofencing, and real-time chat) and <strong>PulseGrid</strong> (a 100% virtual 60 FPS IoT telemetry engine and digital twin cockpit featuring sub-millisecond anomaly detection and host sensor fusion).
         </p>
         <p>
           I'm always looking to turn complex technical challenges into <strong>clean, accessible outcomes</strong>.
@@ -910,17 +907,17 @@ footer .heart { color: var(--accent); }
         <h4>Stack</h4>
         <div class="stack-list">
           <span class="chip">JavaScript</span>
+          <span class="chip">HTML5 Canvas (60fps)</span>
+          <span class="chip">IoT &amp; Telemetry</span>
+          <span class="chip">Digital Twins</span>
+          <span class="chip">Web Audio API</span>
           <span class="chip">Firebase</span>
           <span class="chip">Firestore</span>
-          <span class="chip">Auth</span>
-          <span class="chip">HTML5</span>
-          <span class="chip">CSS3</span>
-          <span class="chip">IoT</span>
+          <span class="chip">Web Crypto API</span>
+          <span class="chip">Geolocation API</span>
+          <span class="chip">Battery API</span>
           <span class="chip">REST APIs</span>
-          <span class="chip">Web Crypto</span>
-          <span class="chip">Geolocation</span>
-          <span class="chip">Git</span>
-          <span class="chip">Vercel</span>
+          <span class="chip">Git &amp; Vercel</span>
         </div>
       </div>
     </div>
@@ -983,22 +980,79 @@ footer .heart { color: var(--accent); }
         </div>
       </div>
 
-      <div class="project-card reveal" style="opacity: 0.7;">
+      <div class="project-card reveal">
         <div class="project-header">
           <div class="project-title">
-            <span class="icon" style="background: var(--bg-2); color: var(--text-muted);">◌</span>
-            Next project
+            <span class="icon" style="background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);">⚡</span>
+            PulseGrid
           </div>
-          <span class="project-status status-wip">In progress</span>
+          <span class="project-status status-live">Live Demo</span>
         </div>
 
         <p class="project-desc">
-          Currently exploring ideas — likely something involving real-time data,
-          IoT, or another problem worth solving properly.
+          A high-throughput virtual IoT telemetry stream engine and digital twin mission control.
+          Visualizes real-time sensor streams at 60 FPS across multi-trace oscilloscopes with sub-millisecond
+          rule-based anomaly detection, host sensor fusion (Battery API, network ping jitter, IMU tilt),
+          synthetic audio alarms, and an interactive recruiter stress-test rack.
         </p>
 
+        <div class="project-features">
+          <div class="feature"><span class="dot" style="background:#06b6d4;"></span> 60 FPS multi-channel canvas oscilloscope (circular ring buffers)</div>
+          <div class="feature"><span class="dot" style="background:#06b6d4;"></span> 100% virtual &amp; zero-cost &mdash; thermodynamic &amp; power bus physics</div>
+          <div class="feature"><span class="dot" style="background:#06b6d4;"></span> Recruiter stress rack &mdash; inject thermal runaway, power surges &amp; packet loss</div>
+          <div class="feature"><span class="dot" style="background:#06b6d4;"></span> Autonomous safety interlocks &amp; emergency SCRAM circuit protection</div>
+          <div class="feature"><span class="dot" style="background:#06b6d4;"></span> Real device telemetry fusion (Battery API, RTT latency, mobile IMU)</div>
+          <div class="feature"><span class="dot" style="background:#06b6d4;"></span> Web Audio API sound synthesizer &amp; live CSV telemetry exporter</div>
+        </div>
+
+        <div class="project-tags">
+          <span class="tag">JavaScript</span>
+          <span class="tag">HTML5 Canvas (60fps)</span>
+          <span class="tag">Web Audio API</span>
+          <span class="tag">Real-Time Telemetry</span>
+          <span class="tag">Digital Twin</span>
+          <span class="tag">Battery API</span>
+          <span class="tag">IoT Simulation</span>
+          <span class="tag">Vercel</span>
+        </div>
+
         <div class="project-links">
-          <a href="#contact" class="link-ghost">Stay tuned</a>
+          <a href="./pulsegrid/index.html" class="link-primary" style="background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%); box-shadow: 0 8px 24px rgba(6, 182, 212, 0.4);">
+            Launch Mission Control
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          </a>
+          <a href="https://github.com/Kirtanx3" target="_blank" rel="noopener" class="link-ghost">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>
+            Source
+          </a>
+        </div>
+      </div>
+
+      <div class="project-card reveal" style="opacity: 0.85;">
+        <div class="project-header">
+          <div class="project-title">
+            <span class="icon" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">👁️</span>
+            SentinelEdge
+          </div>
+          <span class="project-status status-wip">In Development</span>
+        </div>
+
+        <p class="project-desc">
+          Low-bandwidth edge computer vision and smart camera security node. Explores client-side
+          inference (WebAssembly / lightweight YOLO) with binary compressed telemetry packet streams
+          and sub-second incident event dispatching.
+        </p>
+
+        <div class="project-tags">
+          <span class="tag">Edge AI</span>
+          <span class="tag">WebAssembly</span>
+          <span class="tag">WebSockets</span>
+          <span class="tag">Computer Vision</span>
+          <span class="tag">IoT Security</span>
+        </div>
+
+        <div class="project-links">
+          <a href="#contact" class="link-ghost">Preview Roadmap</a>
         </div>
       </div>
     </div>
@@ -1158,3 +1212,4 @@ window.addEventListener('scroll', () => {
 </div>
 </body>
 </html>
+

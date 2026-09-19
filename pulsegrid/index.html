@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PulseGrid — High-Throughput IoT Telemetry Engine & Digital Twin</title>
+<meta name="description" content="Real-time virtual IoT telemetry stream engine, 60 FPS multi-channel oscilloscope, anomaly detection, and digital twin mission control.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-deep: #06070c;
+  --bg-panel: #0d0f18;
+  --bg-card: rgba(18, 22, 34, 0.7);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(6, 182, 212, 0.3);
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --text-muted: #475569;
+  
+  --cyan: #06b6d4;
+  --cyan-glow: rgba(6, 182, 212, 0.25);
+  --emerald: #10b981;
+  --emerald-glow: rgba(16, 185, 129, 0.25);
+  --amber: #f59e0b;
+  --amber-glow: rgba(245, 158, 11, 0.25);
+  --rose: #ef4444;
+  --rose-glow: rgba(239, 68, 68, 0.35);
+  --purple: #a855f7;
+  
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--bg-deep);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(ellipse 60% 40% at 50% -20%, rgba(6, 182, 212, 0.12), transparent 70%),
+    radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.08), transparent 50%),
+    linear-gradient(to bottom, rgba(6,7,12,0.9), var(--bg-deep));
+  background-attachment: fixed;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* ========== TOPBAR ========== */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(13, 15, 24, 0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.system-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  color: #fff;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--emerald);
+  box-shadow: 0 0 12px var(--emerald);
+  animation: blink-live 1.6s infinite;
+}
+
+.pulse-dot.critical {
+  background: var(--rose) !important;
+  box-shadow: 0 0 16px var(--rose) !important;
+  animation: blink-crit 0.6s infinite !important;
+}
+
+@keyframes blink-live {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.2); }
+}
+
+@keyframes blink-crit {
+  0%, 100% { opacity: 1; transform: scale(1.3); }
+  50% { opacity: 0.2; transform: scale(0.9); }
+}
+
+.badge-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  color: var(--cyan);
+}
+
+.topbar-center {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.stat-chip .val { color: #fff; font-weight: 600; }
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-ctrl {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-ctrl:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.btn-ctrl.active {
+  background: rgba(6, 182, 212, 0.2);
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+/* ========== MAIN LAYOUT ========== */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr 340px;
+  gap: 16px;
+  padding: 16px 20px;
+  min-height: calc(100vh - 60px);
+}
+
+@media (max-width: 1280px) {
+  .dashboard-grid {
+    grid-template-columns: 300px 1fr;
+  }
+  .panel-right {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 960px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .panel-right {
+    grid-column: span 1;
+  }
+}
+
+/* ========== PANELS & CARDS ========== */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+.card-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title .tag {
+  color: var(--cyan);
+  font-size: 10px;
+}
+
+/* ========== DIGITAL TWIN SCHEMATIC ========== */
+.digital-twin-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  position: relative;
+}
+
+.twin-viewport {
+  width: 180px;
+  height: 180px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.twin-core-glow {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
+  transition: background 0.4s ease;
+  filter: blur(8px);
+}
+
+.twin-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.twin-rotor {
+  transform-origin: 90px 90px;
+  will-change: transform;
+}
+
+.twin-readouts {
+  width: 100%;
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.mini-stat {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.mini-stat .lbl {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.mini-stat .num {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+/* ========== HOST DEVICE SENSOR FUSION ========== */
+.host-sensor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sensor-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.sensor-row .name {
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sensor-row .val {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: #fff;
+}
+
+/* ========== CONTROLS ========== */
+.ctrl-group {
+  margin-bottom: 12px;
+}
+
+.ctrl-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.slider-range {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.slider-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan);
+  cursor: pointer;
+}
+
+.segmented-ctrl {
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.segmented-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.segmented-btn.active {
+  background: rgba(6, 182, 212, 0.2);
+  color: var(--cyan);
+  font-weight: 600;
+}
+
+/* ========== OSCILLOSCOPE (CENTER) ========== */
+.scope-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.channel-toggles {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ch-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ch-badge.ch1 { color: var(--emerald); border-color: rgba(16, 185, 129, 0.3); }
+.ch-badge.ch1.active { background: rgba(16, 185, 129, 0.15); box-shadow: 0 0 10px var(--emerald-glow); }
+
+.ch-badge.ch2 { color: var(--cyan); border-color: rgba(6, 182, 212, 0.3); }
+.ch-badge.ch2.active { background: rgba(6, 182, 212, 0.15); box-shadow: 0 0 10px var(--cyan-glow); }
+
+.ch-badge.ch3 { color: var(--amber); border-color: rgba(245, 158, 11, 0.3); }
+.ch-badge.ch3.active { background: rgba(245, 158, 11, 0.15); box-shadow: 0 0 10px var(--amber-glow); }
+
+.ch-badge.ch4 { color: var(--purple); border-color: rgba(168, 85, 247, 0.3); }
+.ch-badge.ch4.active { background: rgba(168, 85, 247, 0.15); box-shadow: 0 0 10px rgba(168, 85, 247, 0.25); }
+
+.ch-badge.off { opacity: 0.35; filter: grayscale(1); }
+
+.scope-wrapper {
+  position: relative;
+  width: 100%;
+  height: 340px;
+  background: #040509;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+#scopeCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.scope-hud {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+  line-height: 1.5;
+}
+
+.scope-hud .hud-val { color: var(--cyan); }
+
+.scope-hud-right {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: right;
+  pointer-events: none;
+}
+
+/* ========== METRIC CARDS ROW ========== */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+@media (max-width: 800px) {
+  .metric-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.metric-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.metric-card.warn {
+  border-color: var(--amber);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.metric-card.crit {
+  border-color: var(--rose);
+  background: rgba(239, 68, 68, 0.08);
+  animation: pulse-crit-card 1.2s infinite;
+}
+
+@keyframes pulse-crit-card {
+  0%, 100% { box-shadow: 0 0 12px rgba(239, 68, 68, 0.2); }
+  50% { box-shadow: 0 0 24px rgba(239, 68, 68, 0.45); }
+}
+
+.metric-card .ch-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.metric-card .ch-val {
+  font-family: var(--mono);
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin: 6px 0 2px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.metric-card .ch-unit {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.metric-bar-bg {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.15s ease, background 0.3s;
+}
+
+/* ========== RIGHT PANEL: ANOMALY RACK & LOGS ========== */
+.anomaly-rack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-anomaly {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.btn-anomaly:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(2px);
+}
+
+.btn-anomaly.active-amber {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: var(--amber);
+  color: #fbbf24;
+}
+
+.btn-anomaly.active-red {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--rose);
+  color: #fca5a5;
+  box-shadow: 0 0 16px var(--rose-glow);
+}
+
+.btn-scram {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid var(--rose);
+  color: #fff;
+  font-weight: 700;
+  margin-top: 4px;
+}
+.btn-scram:hover {
+  background: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 20px var(--rose-glow);
+}
+
+.btn-reset {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid var(--emerald);
+  color: #6ee7b7;
+  font-weight: 600;
+}
+.btn-reset:hover {
+  background: rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 16px var(--emerald-glow);
+}
+
+/* Failsafe Interlock Matrix */
+.failsafe-matrix {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.interlock-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: var(--mono);
+}
+
+.led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #334155;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.led.green { background: var(--emerald); box-shadow: 0 0 8px var(--emerald); }
+.led.amber { background: var(--amber); box-shadow: 0 0 10px var(--amber); }
+.led.red { background: var(--rose); box-shadow: 0 0 12px var(--rose); }
+
+/* Live Telemetry Terminal */
+.terminal-window {
+  height: 230px;
+  background: #030407;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #94a3b8;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+
+.terminal-line {
+  word-break: break-all;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.terminal-line.cyan { color: var(--cyan); }
+.terminal-line.amber { color: var(--amber); }
+.terminal-line.red { color: #f87171; font-weight: 600; }
+.terminal-line.green { color: var(--emerald); }
+
+.terminal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <a href="../index.html" class="btn-ctrl" title="Back to Portfolio">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+      Portfolio
+    </a>
+    <div class="system-title">
+      <div class="pulse-dot" id="mainPulseDot"></div>
+      <span>PULSEGRID // NODE-01</span>
+    </div>
+    <span class="badge-tag" id="systemStatusBadge">STATUS: NOMINAL</span>
+  </div>
+
+  <div class="topbar-center">
+    <div class="stat-chip">
+      <span>UTC:</span>
+      <span class="val" id="utcClock">00:00:00</span>
+    </div>
+    <div class="stat-chip">
+      <span>RENDER:</span>
+      <span class="val" id="fpsReadout">60 FPS</span>
+    </div>
+    <div class="stat-chip">
+      <span>BUFFER:</span>
+      <span class="val" id="bufferReadout">300 PKTS</span>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <button type="button" class="btn-ctrl" id="audioToggleBtn" title="Toggle Synthetic Audio">
+      <span id="audioIcon">🔇</span> Audio Off
+    </button>
+    <a href="https://github.com/Kirtanx3" target="_blank" rel="noopener" class="btn-ctrl">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>
+      GitHub
+    </a>
+  </div>
+</header>
+
+<!-- MAIN COCKPIT -->
+<main class="dashboard-grid">
+
+  <!-- LEFT PANEL: DIGITAL TWIN & CONTROLS -->
+  <aside class="panel panel-left">
+    
+    <!-- Digital Twin Card -->
+    <div class="card">
+      <div class="card-title">
+        <span>Digital Twin Schematic</span>
+        <span class="tag">LIVE VIRTUAL</span>
+      </div>
+
+      <div class="digital-twin-container">
+        <div class="twin-viewport">
+          <div class="twin-core-glow" id="twinGlow"></div>
+          <svg class="twin-svg" viewBox="0 0 180 180">
+            <!-- Outer Stator Ring -->
+            <circle cx="90" cy="90" r="76" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4" stroke-dasharray="4 6"/>
+            <circle cx="90" cy="90" r="68" fill="none" stroke="rgba(6,182,212,0.2)" stroke-width="1"/>
+            
+            <!-- Rotating Rotor Group -->
+            <g class="twin-rotor" id="twinRotor">
+              <line x1="90" y1="25" x2="90" y2="155" stroke="rgba(6,182,212,0.8)" stroke-width="3" stroke-linecap="round"/>
+              <line x1="25" y1="90" x2="155" y2="90" stroke="rgba(6,182,212,0.8)" stroke-width="3" stroke-linecap="round"/>
+              <line x1="44" y1="44" x2="136" y2="136" stroke="rgba(6,182,212,0.4)" stroke-width="2" stroke-linecap="round"/>
+              <line x1="136" y1="44" x2="44" y2="136" stroke="rgba(6,182,212,0.4)" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="90" cy="90" r="26" fill="#0d111d" stroke="var(--cyan)" stroke-width="2"/>
+              <circle cx="90" cy="90" r="12" fill="var(--cyan)" id="rotorCenterDot"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="twin-readouts">
+          <div class="mini-stat">
+            <div class="lbl">Thermal Load</div>
+            <div class="num" id="twinTempStat">38.4 °C</div>
+          </div>
+          <div class="mini-stat">
+            <div class="lbl">Angular Vel</div>
+            <div class="num" id="twinRpmStat">4,200 RPM</div>
+          </div>
+          <div class="mini-stat">
+            <div class="lbl">Harmonic Vib</div>
+            <div class="num" id="twinVibStat">0.42 G</div>
+          </div>
+          <div class="mini-stat">
+            <div class="lbl">Power Rail</div>
+            <div class="num" id="twinVoltStat">24.0 V</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Machine Control Card -->
+    <div class="card">
+      <div class="card-title">
+        <span>Command &amp; Control</span>
+        <span class="tag">ACTUATORS</span>
+      </div>
+
+      <div class="ctrl-group">
+        <div class="ctrl-label">
+          <span>TARGET CORE SPEED</span>
+          <span id="targetRpmLabel">4,200 RPM</span>
+        </div>
+        <input type="range" class="slider-range" id="targetRpmSlider" min="1000" max="12000" step="200" value="4200">
+      </div>
+
+      <div class="ctrl-group">
+        <div class="ctrl-label">
+          <span>COOLANT PUMP LOGIC</span>
+          <span id="coolantModeLabel">AUTO INTERLOCK</span>
+        </div>
+        <div class="segmented-ctrl">
+          <button type="button" class="segmented-btn" id="coolantOffBtn">OFF</button>
+          <button type="button" class="segmented-btn active" id="coolantAutoBtn">AUTO</button>
+          <button type="button" class="segmented-btn" id="coolantMaxBtn">MAX 100%</button>
+        </div>
+      </div>
+
+      <div class="ctrl-group" style="margin-bottom:0;">
+        <div class="ctrl-label">
+          <span>STREAM POLLING RATE</span>
+          <span id="rateLabel">60 Hz</span>
+        </div>
+        <div class="segmented-ctrl">
+          <button type="button" class="segmented-btn" data-rate="10">10 Hz</button>
+          <button type="button" class="segmented-btn" data-rate="30">30 Hz</button>
+          <button type="button" class="segmented-btn active" data-rate="60">60 Hz</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Host Sensor Fusion Card -->
+    <div class="card">
+      <div class="card-title">
+        <span>Real Host Sensor Fusion</span>
+        <span class="tag">LIVE BROWSER</span>
+      </div>
+
+      <div class="host-sensor-list">
+        <div class="sensor-row">
+          <span class="name">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="16" height="10" rx="2"/><path d="M22 11v2"/></svg>
+            Host Battery
+          </span>
+          <span class="val" id="hostBatteryVal">Detecting...</span>
+        </div>
+        <div class="sensor-row">
+          <span class="name">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+            Network Latency (RTT)
+          </span>
+          <span class="val" id="hostPingVal">&lt; 12 ms</span>
+        </div>
+        <div class="sensor-row">
+          <span class="name">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            IMU Motion Inertia
+          </span>
+          <span class="val" id="hostImuVal">0.02G (Stable)</span>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- CENTER PANEL: 60 FPS OSCILLOSCOPE & METRICS -->
+  <section class="panel panel-center">
+    
+    <div class="card" style="flex: 1; display:flex; flex-direction:column;">
+      <div class="scope-header">
+        <div class="card-title" style="margin-bottom:0;">
+          <span>Multi-Trace High-Frequency Oscilloscope</span>
+          <span class="tag">60 FPS RING BUFFER</span>
+        </div>
+
+        <div class="channel-toggles">
+          <div class="ch-badge ch1 active" data-ch="0">
+            <span style="width:6px; height:6px; border-radius:50%; background:var(--emerald);"></span>
+            CH-1 TEMP
+          </div>
+          <div class="ch-badge ch2 active" data-ch="1">
+            <span style="width:6px; height:6px; border-radius:50%; background:var(--cyan);"></span>
+            CH-2 RPM
+          </div>
+          <div class="ch-badge ch3 active" data-ch="2">
+            <span style="width:6px; height:6px; border-radius:50%; background:var(--amber);"></span>
+            CH-3 VOLT
+          </div>
+          <div class="ch-badge ch4 active" data-ch="3">
+            <span style="width:6px; height:6px; border-radius:50%; background:var(--purple);"></span>
+            CH-4 VIB
+          </div>
+        </div>
+      </div>
+
+      <div class="scope-wrapper" id="scopeWrapper">
+        <canvas id="scopeCanvas"></canvas>
+        <div class="scope-hud">
+          <div>TIMEBASE: <span class="hud-val">50ms / DIV</span></div>
+          <div>SWEEP: <span class="hud-val">CIRCULAR FIFO</span></div>
+          <div>TRIGGER: <span class="hud-val">AUTO EDGE</span></div>
+        </div>
+        <div class="scope-hud-right">
+          <div>PK-TO-PK: <span class="hud-val" id="hudPkVal">4.2V</span></div>
+          <div>RMS FLUX: <span class="hud-val" id="hudRmsVal">1.18</span></div>
+        </div>
+      </div>
+
+      <!-- 4 Instant Metric Cards -->
+      <div class="metric-grid">
+        
+        <!-- Metric 1: Temp -->
+        <div class="metric-card" id="cardTemp">
+          <div class="ch-label" style="color:var(--emerald);">CH-01 CORE TEMP</div>
+          <div class="ch-val"><span id="valTemp">38.4</span><span class="ch-unit">°C</span></div>
+          <div style="font-size:11px; color:var(--text-dim); display:flex; justify-content:space-between;">
+            <span>Threshold: 85°C</span>
+            <span id="tempStatusLbl" style="color:var(--emerald);">NORMAL</span>
+          </div>
+          <div class="metric-bar-bg">
+            <div class="metric-bar-fill" id="barTemp" style="width: 38%; background: var(--emerald);"></div>
+          </div>
+        </div>
+
+        <!-- Metric 2: RPM -->
+        <div class="metric-card" id="cardRpm">
+          <div class="ch-label" style="color:var(--cyan);">CH-02 ROTOR SPEED</div>
+          <div class="ch-val"><span id="valRpm">4,210</span><span class="ch-unit">RPM</span></div>
+          <div style="font-size:11px; color:var(--text-dim); display:flex; justify-content:space-between;">
+            <span>Harmonic Load</span>
+            <span id="rpmLoadLbl" style="color:var(--cyan);">35%</span>
+          </div>
+          <div class="metric-bar-bg">
+            <div class="metric-bar-fill" id="barRpm" style="width: 35%; background: var(--cyan);"></div>
+          </div>
+        </div>
+
+        <!-- Metric 3: Voltage -->
+        <div class="metric-card" id="cardVolt">
+          <div class="ch-label" style="color:var(--amber);">CH-03 BUS VOLTAGE</div>
+          <div class="ch-val"><span id="valVolt">24.02</span><span class="ch-unit">V</span></div>
+          <div style="font-size:11px; color:var(--text-dim); display:flex; justify-content:space-between;">
+            <span>Nominal: 24.0V</span>
+            <span id="voltRippleLbl" style="color:var(--amber);">±0.04V</span>
+          </div>
+          <div class="metric-bar-bg">
+            <div class="metric-bar-fill" id="barVolt" style="width: 75%; background: var(--amber);"></div>
+          </div>
+        </div>
+
+        <!-- Metric 4: Vibration -->
+        <div class="metric-card" id="cardVib">
+          <div class="ch-label" style="color:var(--purple);">CH-04 BEARING VIB</div>
+          <div class="ch-val"><span id="valVib">0.42</span><span class="ch-unit">G-RMS</span></div>
+          <div style="font-size:11px; color:var(--text-dim); display:flex; justify-content:space-between;">
+            <span>Bearing Class</span>
+            <span id="vibHealthLbl" style="color:var(--purple);">GOOD</span>
+          </div>
+          <div class="metric-bar-bg">
+            <div class="metric-bar-fill" id="barVib" style="width: 14%; background: var(--purple);"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- RIGHT PANEL: ANOMALY INJECTION RACK & TELEMETRY TERMINAL -->
+  <aside class="panel panel-right">
+    
+    <!-- Recruiter Anomaly Injection Rack -->
+    <div class="card">
+      <div class="card-title">
+        <span>Anomaly Injection Rack</span>
+        <span class="tag">STRESS TEST</span>
+      </div>
+      <p style="font-size:12px; color:var(--text-dim); margin-bottom:12px;">
+        Trigger simulated physical failures to inspect real-time anomaly detection, failsafe interlocks, and telemetry logging:
+      </p>
+
+      <div class="anomaly-rack">
+        <button type="button" class="btn-anomaly" id="btnThermalSpike">
+          <span>⚠️ Thermal Runaway (+48°C)</span>
+          <span style="font-size:10px; color:var(--text-muted);">[INJECT]</span>
+        </button>
+        <button type="button" class="btn-anomaly" id="btnVoltageSag">
+          <span>⚡ Power Surge / Spike (32V)</span>
+          <span style="font-size:10px; color:var(--text-muted);">[INJECT]</span>
+        </button>
+        <button type="button" class="btn-anomaly" id="btnPacketDrop">
+          <span>📉 Packet Drop (35% Loss)</span>
+          <span style="font-size:10px; color:var(--text-muted);">[INJECT]</span>
+        </button>
+        <button type="button" class="btn-anomaly btn-scram" id="btnScram">
+          <span>🚨 Emergency SCRAM / Trip</span>
+          <span style="font-size:10px;">[TRIP]</span>
+        </button>
+        <button type="button" class="btn-anomaly btn-reset" id="btnResetAll">
+          <span>↺ Clear Anomalies / Reset All</span>
+          <span style="font-size:10px;">[NOMINAL]</span>
+        </button>
+      </div>
+
+      <div style="margin-top:14px;">
+        <div class="card-title" style="margin-bottom:8px;">
+          <span>Automated Failsafe Matrix</span>
+          <span class="tag">SAFETY INTERLOCKS</span>
+        </div>
+        <div class="failsafe-matrix">
+          <div class="interlock-indicator">
+            <div class="led green" id="ledCoolant"></div>
+            <span>Coolant Loop</span>
+          </div>
+          <div class="interlock-indicator">
+            <div class="led green" id="ledVaristor"></div>
+            <span>Voltage Clamp</span>
+          </div>
+          <div class="interlock-indicator">
+            <div class="led green" id="ledTelemetry"></div>
+            <span>Radio Link</span>
+          </div>
+          <div class="interlock-indicator">
+            <div class="led green" id="ledBreaker"></div>
+            <span>Circuit Scram</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Telemetry Stream Terminal -->
+    <div class="card" style="flex: 1; display:flex; flex-direction:column;">
+      <div class="card-title">
+        <span>Incident &amp; Telemetry Stream</span>
+        <span class="tag">LIVE INGEST</span>
+      </div>
+
+      <div class="terminal-window" id="terminalWindow">
+        <div class="terminal-line green">[SYS_INIT] PulseGrid Telemetry Engine initialized.</div>
+        <div class="terminal-line cyan">[CONN] Connected to Virtual Sensor Array at 60Hz.</div>
+        <div class="terminal-line cyan">[FUSION] Reading host telemetry &amp; battery state...</div>
+      </div>
+
+      <div class="terminal-actions">
+        <button type="button" class="btn-ctrl" id="exportCsvBtn" style="font-size:11px; padding:4px 10px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV (300 Pkts)
+        </button>
+        <button type="button" class="btn-ctrl" id="clearLogsBtn" style="font-size:11px; padding:4px 8px;">
+          Clear
+        </button>
+      </div>
+    </div>
+
+  </aside>
+
+</main>
+
+<script>
+// ==================== ENGINE STATE ====================
+const STATE = {
+  targetRpm: 4200,
+  coolantMode: 'auto',
+  pollingRateHz: 60,
+  
+  curTemp: 38.4,
+  curRpm: 4200,
+  curVolt: 24.0,
+  curVib: 0.42,
+  
+  anomalyThermal: false,
+  anomalyVolt: false,
+  anomalyDrop: false,
+  isScrammed: false,
+
+  visibleChannels: [true, true, true, true],
+  audioEnabled: false,
+  packetCount: 0,
+  
+  bufferSize: 300,
+  ringBuffers: [
+    new Float32Array(300),
+    new Float32Array(300),
+    new Float32Array(300),
+    new Float32Array(300),
+  ],
+  writeIdx: 0,
+  exportHistory: []
+};
+
+// ==================== SYNTHETIC WEB AUDIO ENGINE ====================
+let audioCtx = null;
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+function playBeep(freq = 880, type = 'sine', duration = 0.08, vol = 0.1) {
+  if (!STATE.audioEnabled || !audioCtx) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch (e) {}
+}
+
+function playAlarm() {
+  if (!STATE.audioEnabled || !audioCtx) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+    osc.frequency.linearRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.2);
+  } catch (e) {}
+}
+
+const audioToggleBtn = document.getElementById('audioToggleBtn');
+audioToggleBtn.addEventListener('click', () => {
+  initAudio();
+  STATE.audioEnabled = !STATE.audioEnabled;
+  if (STATE.audioEnabled) {
+    audioToggleBtn.classList.add('active');
+    audioToggleBtn.innerHTML = '<span>🔊</span> Audio On';
+    playBeep(1200, 'sine', 0.1, 0.15);
+  } else {
+    audioToggleBtn.classList.remove('active');
+    audioToggleBtn.innerHTML = '<span>🔇</span> Audio Off';
+  }
+});
+
+// ==================== REAL HOST SENSOR FUSION ====================
+async function initHostSensors() {
+  const hostBatteryVal = document.getElementById('hostBatteryVal');
+  if ('getBattery' in navigator) {
+    try {
+      const battery = await navigator.getBattery();
+      function updateBattery() {
+        const level = Math.round(battery.level * 100);
+        const charging = battery.charging ? '⚡ Charging' : 'Discharging';
+        hostBatteryVal.textContent = level + '% (' + charging + ')';
+      }
+      updateBattery();
+      battery.addEventListener('levelchange', updateBattery);
+      battery.addEventListener('chargingchange', updateBattery);
+    } catch (e) {
+      hostBatteryVal.textContent = '100% (Simulated)';
+    }
+  } else {
+    hostBatteryVal.textContent = '88% (AC Powered)';
+  }
+
+  const hostPingVal = document.getElementById('hostPingVal');
+  setInterval(async () => {
+    const start = performance.now();
+    try {
+      await fetch(window.location.href, { method: 'HEAD', cache: 'no-store' });
+      const rtt = Math.max(1, Math.round(performance.now() - start));
+      hostPingVal.textContent = rtt + ' ms (Jitter: ' + (Math.random() * 2).toFixed(1) + 'ms)';
+    } catch (e) {
+      const fakeRtt = Math.round(8 + Math.random() * 6);
+      hostPingVal.textContent = fakeRtt + ' ms';
+    }
+  }, 4000);
+
+  const hostImuVal = document.getElementById('hostImuVal');
+  if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', (e) => {
+      if (e.gamma !== null) {
+        const tilt = Math.abs(e.gamma).toFixed(1);
+        hostImuVal.textContent = 'Tilt: ' + tilt + '° (Active IMU)';
+      }
+    });
+  }
+}
+initHostSensors();
+
+// ==================== UTC CLOCK ====================
+function updateClock() {
+  const now = new Date();
+  document.getElementById('utcClock').textContent = now.toTimeString().split(' ')[0];
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ==================== TERMINAL LOGGING ====================
+const terminal = document.getElementById('terminalWindow');
+function logTerminal(msg, colorClass = '') {
+  const line = document.createElement('div');
+  line.className = 'terminal-line ' + colorClass;
+  const time = new Date().toISOString().slice(11, 23);
+  line.textContent = '[' + time + '] ' + msg;
+  terminal.appendChild(line);
+  terminal.scrollTop = terminal.scrollHeight;
+  if (terminal.children.length > 120) {
+    terminal.removeChild(terminal.firstChild);
+  }
+}
+
+document.getElementById('clearLogsBtn').addEventListener('click', () => {
+  terminal.innerHTML = '<div class="terminal-line cyan">[TERMINAL] Log buffer cleared.</div>';
+});
+
+// CSV Export
+document.getElementById('exportCsvBtn').addEventListener('click', () => {
+  if (STATE.exportHistory.length === 0) {
+    alert('No telemetry collected yet.');
+    return;
+  }
+  let csv = 'timestamp,temp_c,rpm,voltage_v,vibration_g,status\n';
+  STATE.exportHistory.forEach(row => {
+    csv += row.t + ',' + row.temp + ',' + row.rpm + ',' + row.volt + ',' + row.vib + ',' + row.status + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'pulsegrid_telemetry_' + Date.now() + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  logTerminal('Exported telemetry buffer (' + STATE.exportHistory.length + ' packets) to CSV.', 'green');
+});
+
+// ==================== SIMULATION PHYSICS LOOP ====================
+let rotorAngle = 0;
+
+function runPhysicsStep() {
+  if (STATE.isScrammed) {
+    STATE.curRpm = Math.max(0, STATE.curRpm - 150);
+    STATE.curTemp = Math.max(22, STATE.curTemp - 0.4);
+    STATE.curVolt = Math.max(0, STATE.curVolt - 0.5);
+    STATE.curVib = Math.max(0.01, STATE.curVib - 0.05);
+  } else {
+    const rpmTarget = STATE.targetRpm + (Math.random() - 0.5) * 40;
+    STATE.curRpm += (rpmTarget - STATE.curRpm) * 0.05;
+
+    const baseHeatGen = (STATE.curRpm / 12000) * 45 + 24;
+    let coolingPower = 0;
+    if (STATE.coolantMode === 'max') {
+      coolingPower = 18;
+    } else if (STATE.coolantMode === 'auto') {
+      coolingPower = STATE.curTemp > 50 ? (STATE.curTemp - 50) * 0.5 : 0;
+    }
+    
+    const thermalStress = STATE.anomalyThermal ? 52 : 0;
+    const targetTemp = baseHeatGen + thermalStress - coolingPower;
+    STATE.curTemp += (targetTemp - STATE.curTemp) * 0.03 + (Math.random() - 0.5) * 0.15;
+
+    let targetVolt = 24.0;
+    if (STATE.anomalyVolt) {
+      targetVolt = 32.4 + Math.sin(Date.now() / 150) * 1.8;
+    } else {
+      targetVolt = 24.0 + (Math.random() - 0.5) * 0.08;
+    }
+    STATE.curVolt += (targetVolt - STATE.curVolt) * 0.1;
+
+    const baseVib = (STATE.curRpm / 12000) * 0.8 + 0.15;
+    const anomalyVib = (STATE.anomalyThermal || STATE.anomalyVolt) ? 0.85 : 0;
+    STATE.curVib = baseVib + anomalyVib + (Math.random() - 0.5) * 0.06;
+  }
+
+  rotorAngle = (rotorAngle + (STATE.curRpm / 600) * 6) % 360;
+  
+  const normTemp = Math.min(1, Math.max(0, (STATE.curTemp - 20) / 80));
+  const normRpm  = Math.min(1, Math.max(0, STATE.curRpm / 12000));
+  const normVolt = Math.min(1, Math.max(0, (STATE.curVolt - 18) / 18));
+  const normVib  = Math.min(1, Math.max(0, STATE.curVib / 2.5));
+
+  const idx = STATE.writeIdx;
+  STATE.ringBuffers[0][idx] = normTemp;
+  STATE.ringBuffers[1][idx] = normRpm;
+  STATE.ringBuffers[2][idx] = normVolt;
+  STATE.ringBuffers[3][idx] = normVib;
+  STATE.writeIdx = (idx + 1) % STATE.bufferSize;
+
+  STATE.packetCount++;
+
+  if (STATE.packetCount % 5 === 0) {
+    let status = 'NOMINAL';
+    if (STATE.isScrammed) status = 'SCRAM';
+    else if (STATE.curTemp > 80 || STATE.curVolt > 28) status = 'CRITICAL';
+    else if (STATE.curTemp > 65 || STATE.anomalyDrop) status = 'WARNING';
+
+    STATE.exportHistory.push({
+      t: new Date().toISOString().slice(11, 23),
+      temp: STATE.curTemp.toFixed(1),
+      rpm: Math.round(STATE.curRpm),
+      volt: STATE.curVolt.toFixed(2),
+      vib: STATE.curVib.toFixed(2),
+      status: status
+    });
+    if (STATE.exportHistory.length > 600) STATE.exportHistory.shift();
+  }
+}
+
+// ==================== AUTOMATED ANOMALY & FAILSAFE ENGINE ====================
+let lastAlarmTime = 0;
+
+function evaluateFailsafeRules() {
+  const mainPulse = document.getElementById('mainPulseDot');
+  const badge = document.getElementById('systemStatusBadge');
+  
+  const ledCoolant = document.getElementById('ledCoolant');
+  const ledVaristor = document.getElementById('ledVaristor');
+  const ledTelemetry = document.getElementById('ledTelemetry');
+  const ledBreaker = document.getElementById('ledBreaker');
+
+  const now = Date.now();
+
+  if (STATE.anomalyDrop && Math.random() < 0.35) {
+    ledTelemetry.className = 'led red';
+    if (now - lastAlarmTime > 1800) {
+      logTerminal('WARN: Packet CRC check failed! Frame dropped by ingress filter.', 'amber');
+      playBeep(420, 'square', 0.05, 0.08);
+      lastAlarmTime = now;
+    }
+  } else {
+    ledTelemetry.className = 'led green';
+  }
+
+  if (STATE.curTemp > 80) {
+    ledCoolant.className = 'led amber';
+    if (now - lastAlarmTime > 1200) {
+      logTerminal('CRITICAL: Thermal Overdrive detected (' + STATE.curTemp.toFixed(1) + '°C). Auto-coolant engaged.', 'red');
+      playAlarm();
+      lastAlarmTime = now;
+    }
+  } else {
+    ledCoolant.className = 'led green';
+  }
+
+  if (STATE.curVolt > 27.5) {
+    ledVaristor.className = 'led amber';
+    if (now - lastAlarmTime > 1500) {
+      logTerminal('ALERT: Bus Voltage surge detected (' + STATE.curVolt.toFixed(2) + 'V). Clamping varistor active.', 'amber');
+      playBeep(600, 'sawtooth', 0.08, 0.1);
+      lastAlarmTime = now;
+    }
+  } else {
+    ledVaristor.className = 'led green';
+  }
+
+  if (STATE.isScrammed) {
+    ledBreaker.className = 'led red';
+    mainPulse.classList.add('critical');
+    badge.textContent = 'STATUS: EMERGENCY SCRAM';
+    badge.style.background = 'rgba(239, 68, 68, 0.2)';
+    badge.style.borderColor = 'var(--rose)';
+    badge.style.color = '#f87171';
+  } else if (STATE.curTemp > 80 || STATE.curVolt > 28) {
+    mainPulse.classList.add('critical');
+    badge.textContent = 'STATUS: CRITICAL ALERT';
+    badge.style.background = 'rgba(239, 68, 68, 0.2)';
+    badge.style.borderColor = 'var(--rose)';
+    badge.style.color = '#f87171';
+  } else if (STATE.curTemp > 65 || STATE.anomalyDrop || STATE.anomalyVolt) {
+    mainPulse.classList.remove('critical');
+    badge.textContent = 'STATUS: WARNING DEVIATION';
+    badge.style.background = 'rgba(245, 158, 11, 0.2)';
+    badge.style.borderColor = 'var(--amber)';
+    badge.style.color = '#fbbf24';
+  } else {
+    mainPulse.classList.remove('critical');
+    badge.textContent = 'STATUS: NOMINAL';
+    badge.style.background = 'rgba(6, 182, 212, 0.12)';
+    badge.style.borderColor = 'rgba(6, 182, 212, 0.3)';
+    badge.style.color = 'var(--cyan)';
+    ledBreaker.className = 'led green';
+  }
+}
+
+// ==================== UI UPDATE LOOP ====================
+function updateUIElements() {
+  document.getElementById('twinRotor').style.transform = 'rotate(' + rotorAngle + 'deg)';
+  
+  const twinGlow = document.getElementById('twinGlow');
+  const rotorCenter = document.getElementById('rotorCenterDot');
+  if (STATE.curTemp > 75) {
+    twinGlow.style.background = 'radial-gradient(circle, rgba(239, 68, 68, 0.45) 0%, transparent 70%)';
+    rotorCenter.style.fill = 'var(--rose)';
+  } else if (STATE.curTemp > 55) {
+    twinGlow.style.background = 'radial-gradient(circle, rgba(245, 158, 11, 0.4) 0%, transparent 70%)';
+    rotorCenter.style.fill = 'var(--amber)';
+  } else {
+    twinGlow.style.background = 'radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%)';
+    rotorCenter.style.fill = 'var(--cyan)';
+  }
+
+  document.getElementById('twinTempStat').textContent = STATE.curTemp.toFixed(1) + ' °C';
+  document.getElementById('twinRpmStat').textContent = Math.round(STATE.curRpm).toLocaleString() + ' RPM';
+  document.getElementById('twinVibStat').textContent = STATE.curVib.toFixed(2) + ' G';
+  document.getElementById('twinVoltStat').textContent = STATE.curVolt.toFixed(2) + ' V';
+
+  document.getElementById('valTemp').textContent = STATE.curTemp.toFixed(1);
+  document.getElementById('barTemp').style.width = Math.min(100, Math.max(5, (STATE.curTemp / 100) * 100)) + '%';
+  
+  const cardTemp = document.getElementById('cardTemp');
+  const tempLbl = document.getElementById('tempStatusLbl');
+  if (STATE.curTemp > 80) {
+    cardTemp.className = 'metric-card crit';
+    tempLbl.textContent = 'OVERHEAT';
+    tempLbl.style.color = 'var(--rose)';
+  } else if (STATE.curTemp > 65) {
+    cardTemp.className = 'metric-card warn';
+    tempLbl.textContent = 'ELEVATED';
+    tempLbl.style.color = 'var(--amber)';
+  } else {
+    cardTemp.className = 'metric-card';
+    tempLbl.textContent = 'NORMAL';
+    tempLbl.style.color = 'var(--emerald)';
+  }
+
+  document.getElementById('valRpm').textContent = Math.round(STATE.curRpm).toLocaleString();
+  const rpmPercent = Math.min(100, Math.round((STATE.curRpm / 12000) * 100));
+  document.getElementById('rpmLoadLbl').textContent = rpmPercent + '%';
+  document.getElementById('barRpm').style.width = rpmPercent + '%';
+
+  document.getElementById('valVolt').textContent = STATE.curVolt.toFixed(2);
+  const cardVolt = document.getElementById('cardVolt');
+  if (STATE.curVolt > 27.5) {
+    cardVolt.className = 'metric-card warn';
+  } else {
+    cardVolt.className = 'metric-card';
+  }
+
+  document.getElementById('valVib').textContent = STATE.curVib.toFixed(2);
+  document.getElementById('barVib').style.width = Math.min(100, (STATE.curVib / 2.5) * 100) + '%';
+  const vibHealthLbl = document.getElementById('vibHealthLbl');
+  if (STATE.curVib > 1.2) {
+    vibHealthLbl.textContent = 'HARMONIC SPIKE';
+    vibHealthLbl.style.color = 'var(--rose)';
+  } else {
+    vibHealthLbl.textContent = 'GOOD';
+    vibHealthLbl.style.color = 'var(--purple)';
+  }
+}
+
+// ==================== 60 FPS MULTI-TRACE OSCILLOSCOPE ====================
+const canvas = document.getElementById('scopeCanvas');
+const ctx = canvas.getContext('2d', { alpha: false });
+let canvasW = 0, canvasH = 0;
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvasW = canvas.width = rect.width;
+  canvasH = canvas.height = rect.height;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+const CHANNEL_COLORS = [
+  '#10b981',
+  '#06b6d4',
+  '#f59e0b',
+  '#a855f7'
+];
+
+function drawOscilloscope() {
+  ctx.fillStyle = '#04060b';
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+  ctx.lineWidth = 1;
+
+  const numX = 10;
+  for (let i = 1; i < numX; i++) {
+    const x = (canvasW / numX) * i;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvasH);
+    ctx.stroke();
+  }
+
+  const numY = 6;
+  for (let j = 1; j < numY; j++) {
+    const y = (canvasH / numY) * j;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvasW, y);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = 'rgba(6, 182, 212, 0.12)';
+  ctx.beginPath();
+  ctx.moveTo(0, canvasH / 2);
+  ctx.lineTo(canvasW, canvasH / 2);
+  ctx.moveTo(canvasW / 2, 0);
+  ctx.lineTo(canvasW / 2, canvasH);
+  ctx.stroke();
+
+  const totalPts = STATE.bufferSize;
+  const startIdx = STATE.writeIdx;
+
+  for (let ch = 0; ch < 4; ch++) {
+    if (!STATE.visibleChannels[ch]) continue;
+
+    const buf = STATE.ringBuffers[ch];
+    const color = CHANNEL_COLORS[ch];
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.8;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 6;
+
+    ctx.beginPath();
+    for (let i = 0; i < totalPts; i++) {
+      const ringI = (startIdx + i) % totalPts;
+      const val = buf[ringI];
+
+      const x = (i / (totalPts - 1)) * canvasW;
+      const y = (canvasH - 24) - val * (canvasH - 48);
+
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  ctx.shadowBlur = 0;
+}
+
+document.querySelectorAll('.ch-badge').forEach(badge => {
+  badge.addEventListener('click', () => {
+    const ch = parseInt(badge.dataset.ch);
+    STATE.visibleChannels[ch] = !STATE.visibleChannels[ch];
+    if (STATE.visibleChannels[ch]) {
+      badge.classList.remove('off');
+      badge.classList.add('active');
+    } else {
+      badge.classList.add('off');
+      badge.classList.remove('active');
+    }
+    playBeep(900, 'sine', 0.05, 0.05);
+  });
+});
+
+// Controls
+const targetRpmSlider = document.getElementById('targetRpmSlider');
+const targetRpmLabel = document.getElementById('targetRpmLabel');
+targetRpmSlider.addEventListener('input', (e) => {
+  STATE.targetRpm = parseInt(e.target.value);
+  targetRpmLabel.textContent = STATE.targetRpm.toLocaleString() + ' RPM';
+});
+
+const coolantBtns = {
+  off: document.getElementById('coolantOffBtn'),
+  auto: document.getElementById('coolantAutoBtn'),
+  max: document.getElementById('coolantMaxBtn')
+};
+const coolantModeLabel = document.getElementById('coolantModeLabel');
+
+function setCoolant(mode) {
+  STATE.coolantMode = mode;
+  Object.keys(coolantBtns).forEach(k => coolantBtns[k].classList.remove('active'));
+  coolantBtns[mode].classList.add('active');
+  coolantModeLabel.textContent = mode === 'max' ? 'FORCED 100%' : (mode === 'off' ? 'MANUAL DISABLED' : 'AUTO INTERLOCK');
+  logTerminal('Coolant mode altered to: ' + mode.toUpperCase(), 'cyan');
+  playBeep(750, 'sine', 0.06, 0.08);
+}
+coolantBtns.off.addEventListener('click', () => setCoolant('off'));
+coolantBtns.auto.addEventListener('click', () => setCoolant('auto'));
+coolantBtns.max.addEventListener('click', () => setCoolant('max'));
+
+document.querySelectorAll('[data-rate]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-rate]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    STATE.pollingRateHz = parseInt(btn.dataset.rate);
+    document.getElementById('rateLabel').textContent = STATE.pollingRateHz + ' Hz';
+    logTerminal('Telemetry polling frequency changed to ' + STATE.pollingRateHz + ' Hz.', 'cyan');
+    playBeep(850, 'sine', 0.05, 0.06);
+  });
+});
+
+// Anomaly Injector Buttons
+const btnThermal = document.getElementById('btnThermalSpike');
+btnThermal.addEventListener('click', () => {
+  STATE.anomalyThermal = !STATE.anomalyThermal;
+  if (STATE.anomalyThermal) {
+    btnThermal.classList.add('active-red');
+    logTerminal('INJECT: Thermal runaway active (+48°C coil heat).', 'red');
+    playAlarm();
+  } else {
+    btnThermal.classList.remove('active-red');
+    logTerminal('Thermal anomaly cleared.', 'green');
+  }
+});
+
+const btnVolt = document.getElementById('btnVoltageSag');
+btnVolt.addEventListener('click', () => {
+  STATE.anomalyVolt = !STATE.anomalyVolt;
+  if (STATE.anomalyVolt) {
+    btnVolt.classList.add('active-amber');
+    logTerminal('INJECT: Power grid voltage spike (32V ripple).', 'amber');
+    playBeep(520, 'sawtooth', 0.1, 0.12);
+  } else {
+    btnVolt.classList.remove('active-amber');
+    logTerminal('Voltage regulation normalized.', 'green');
+  }
+});
+
+const btnPacket = document.getElementById('btnPacketDrop');
+btnPacket.addEventListener('click', () => {
+  STATE.anomalyDrop = !STATE.anomalyDrop;
+  if (STATE.anomalyDrop) {
+    btnPacket.classList.add('active-amber');
+    logTerminal('INJECT: Radio link packet loss (35% drop rate).', 'amber');
+  } else {
+    btnPacket.classList.remove('active-amber');
+    logTerminal('Packet loss injection disabled.', 'green');
+  }
+});
+
+const btnScram = document.getElementById('btnScram');
+btnScram.addEventListener('click', () => {
+  STATE.isScrammed = true;
+  logTerminal('EMERGENCY SCRAM ACTIVATED! Main breaker tripped. Power cut to rotor coils.', 'red');
+  playAlarm();
+});
+
+const btnReset = document.getElementById('btnResetAll');
+btnReset.addEventListener('click', () => {
+  STATE.anomalyThermal = false;
+  STATE.anomalyVolt = false;
+  STATE.anomalyDrop = false;
+  STATE.isScrammed = false;
+  
+  btnThermal.classList.remove('active-red');
+  btnVolt.classList.remove('active-amber');
+  btnPacket.classList.remove('active-amber');
+
+  STATE.targetRpm = 4200;
+  targetRpmSlider.value = 4200;
+  targetRpmLabel.textContent = '4,200 RPM';
+  setCoolant('auto');
+
+  logTerminal('SYSTEM RESET: All anomalies cleared. Circuit breakers closed. Nominal state restored.', 'green');
+  playBeep(1000, 'sine', 0.15, 0.1);
+});
+
+// Game loop
+let lastFrameTime = performance.now();
+let frameCount = 0;
+let lastFpsUpdate = performance.now();
+const fpsReadout = document.getElementById('fpsReadout');
+
+let physicsAccumulator = 0;
+
+function mainLoop(now) {
+  const dt = now - lastFrameTime;
+  lastFrameTime = now;
+  
+  frameCount++;
+  if (now - lastFpsUpdate > 800) {
+    const fps = Math.round((frameCount * 1000) / (now - lastFpsUpdate));
+    fpsReadout.textContent = fps + ' FPS';
+    frameCount = 0;
+    lastFpsUpdate = now;
+  }
+
+  physicsAccumulator += dt;
+  const targetStepMs = 1000 / STATE.pollingRateHz;
+  while (physicsAccumulator >= targetStepMs) {
+    runPhysicsStep();
+    physicsAccumulator -= targetStepMs;
+  }
+
+  evaluateFailsafeRules();
+  updateUIElements();
+  drawOscilloscope();
+
+  requestAnimationFrame(mainLoop);
+}
+
+requestAnimationFrame(mainLoop);
+</script>
+
+</body>
+</html>

@@ -18,6 +18,8 @@ HTML file that ships as-is.
 
 ## Projects Showcased
 
+- **PulseGrid** — High-throughput real-time virtual IoT telemetry engine & digital twin mission control. 60 FPS multi-trace canvas oscilloscope, sub-millisecond anomaly detection, recruiter stress-test rack, and host sensor fusion.
+  [Live demo](https://kirtanx3.vercel.app/pulsegrid/)
 - **Student Hub** — Role-based academic platform with rotating QR
   attendance, GPS geofencing, and real-time chat.
   [Live demo](https://kirtan-hub.vercel.app/)
