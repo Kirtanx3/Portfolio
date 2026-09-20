@@ -190,6 +190,59 @@ a, button { cursor: pointer; }
   flex-direction: column;
   justify-content: center;
   padding: 120px 0 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(167, 139, 250, 0.16) 1px, transparent 1.5px);
+  background-size: 26px 26px;
+  mask-image: linear-gradient(#000 0%, #000 65%, transparent 95%);
+  -webkit-mask-image: linear-gradient(#000 0%, #000 65%, transparent 95%);
+}
+
+.hero-art {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  pointer-events: none;
+  user-select: none;
+  overflow: hidden;
+  z-index: 0;
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 15%, #000 75%, transparent 98%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 15%, #000 75%, transparent 98%);
+}
+
+.hero-art pre {
+  font-family: var(--mono);
+  letter-spacing: 1.5px;
+  color: var(--accent);
+  opacity: 0.45;
+  flex-shrink: 0;
+  margin: 0;
+  font-size: 10.5px;
+  line-height: 1.25;
+  text-shadow: 0 0 16px rgba(167, 139, 250, 0.25);
+  transition: opacity 0.5s ease;
+}
+
+@media (max-width: 768px) {
+  .hero-art pre {
+    font-size: 7px;
+    letter-spacing: 0.8px;
+    opacity: 0.35;
+  }
 }
 
 .hero-badge {
@@ -808,6 +861,7 @@ footer .heart { color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .orb { animation: none !important; }
+  .hero-art pre { animation: none !important; }
   .hero-badge .pulse { animation: none !important; }
   .status-live::before { animation: none !important; }
   .hero .typing-line .caret { animation: none !important; }
@@ -835,6 +889,9 @@ footer .heart { color: var(--accent); }
 </nav>
 
 <header class="hero">
+  <div class="hero-art" aria-hidden="true">
+    <pre id="heroArtPre"></pre>
+  </div>
   <div class="container">
     <a href="#contact" class="hero-badge">
       <span class="pulse"></span>
@@ -1202,6 +1259,179 @@ window.addEventListener('scroll', () => {
     }
   });
 }, { passive: true });
+
+// ============ OPENCLAW-STYLE ASCII DITHERED HERO ANIMATION ============
+(() => {
+  const preEl = document.getElementById('heroArtPre');
+  const heroEl = document.querySelector('.hero');
+  if (!preEl || !heroEl) return;
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const FRAME_INTERVAL = 1000 / 30; // 30 FPS active
+  const IDLE_INTERVAL = 100;        // 10 FPS idle
+  const RATIO = 1.9;
+  const GLOW_INTENSITY = 0.6;
+  const CHAR_RAMP = ' .:-=+xX#8@';
+  const COLS = 220;
+  const ROWS = 26;
+
+  // 4x4 Bayer Matrix for ordered dithering
+  const BAYER = [
+    [ 0,  8,  2, 10],
+    [12,  4, 14,  6],
+    [ 3, 11,  1,  9],
+    [15,  7, 13,  5]
+  ];
+
+  // Precompute static geometry grid
+  const grid = Array.from({ length: ROWS }, (_, row) =>
+    Array.from({ length: COLS }, (_, col) => {
+      const dx = col - COLS / 2;
+      const dy = (31 - row) * RATIO;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const angleEnv = Math.sin(Math.atan2(dy, dx)) ** 2;
+      const outerFalloff = Math.min(Math.max(1.15 - dist / 110, 0), 1);
+      const innerCutout = Math.min(Math.max((dist - 24) / 18, 0), 1);
+      return {
+        dist,
+        envelope: angleEnv * outerFalloff * innerCutout * 1.4,
+        threshold: (BAYER[row % 4][col % 4] + 0.5) / 16
+      };
+    })
+  );
+
+  function render(timeSec = 0, target = null) {
+    let out = '';
+    const hasTarget = target !== null && target.presence > 0;
+    const presence = hasTarget ? Math.min(target.presence, 1) : 0;
+
+    for (let r = 0; r < ROWS; r++) {
+      const row = grid[r];
+      for (let c = 0; c < COLS; c++) {
+        const cell = row[c];
+        let mDist = cell.dist;
+        let flare = 0;
+
+        if (hasTarget) {
+          const dx = c - target.col;
+          const dy = (r - target.row) * RATIO;
+          const mouseDist = Math.sqrt(dx * dx + dy * dy);
+          const s = mouseDist / 20;
+
+          if (mouseDist > 0 && s < 2.5) {
+            const push = 9 * presence * s * Math.exp(0.5 - s * s) * Math.SQRT2;
+            const warpedCol = c - (dx / mouseDist) * push;
+            const warpedRow = r - (dy / mouseDist) * push / RATIO;
+            const fx = warpedCol - COLS / 2;
+            const fy = (31 - warpedRow) * RATIO;
+            mDist = Math.sqrt(fx * fx + fy * fy);
+            flare = Math.exp(-(s * s)) * presence * GLOW_INTENSITY;
+          }
+        }
+
+        // Harmonic sine wave sharpened with exponent 3.5
+        let wave = (0.5 + 0.5 * Math.sin(mDist * 0.3 - timeSec * 0.35)) ** 3.5 * cell.envelope * (1 + flare);
+        if (wave < 0.05) wave = 0;
+        else if (wave > 1) wave = 1;
+
+        const scaled = wave * 10;
+        const charIdx = Math.min(10, Math.floor(scaled) + (scaled % 1 > cell.threshold ? 1 : 0));
+        out += CHAR_RAMP[charIdx];
+      }
+      out += '\n';
+    }
+    return out;
+  }
+
+  // Initial render
+  preEl.textContent = render(0, null);
+  if (reducedMotion) return;
+
+  // Animation loop & interactive physics state
+  let rafId = 0;
+  let lastTime = 0;
+  let isIntersecting = true;
+  let rawMouse = null;
+  let smoothX = 0;
+  let smoothY = 0;
+  let presence = 0;
+
+  const LERP_SPEED = 0.28;
+  const PRESENCE_SPEED = 0.18;
+
+  function stop() {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = 0;
+    }
+  }
+
+  function tick(timestamp) {
+    if (document.hidden || !isIntersecting) {
+      stop();
+      return;
+    }
+
+    const interval = (rawMouse !== null || presence > 0) ? FRAME_INTERVAL : IDLE_INTERVAL;
+    if (timestamp - lastTime >= interval) {
+      lastTime = timestamp;
+
+      if (rawMouse) {
+        smoothX += (rawMouse.x - smoothX) * LERP_SPEED;
+        smoothY += (rawMouse.y - smoothY) * LERP_SPEED;
+      }
+      presence += ((rawMouse ? 1 : 0) - presence) * PRESENCE_SPEED;
+      if (!rawMouse && presence < 0.01) presence = 0;
+
+      const rect = preEl.getBoundingClientRect();
+      const target = (presence > 0 && rect.width > 0 && rect.height > 0) ? {
+        col: (smoothX / rect.width) * COLS,
+        row: (smoothY / rect.height) * ROWS,
+        presence
+      } : null;
+
+      preEl.textContent = render(timestamp / 1000, target);
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function start() {
+    if (!rafId && !document.hidden && isIntersecting) {
+      rafId = requestAnimationFrame(tick);
+    }
+  }
+
+  function onPointerMove(e) {
+    if (e.pointerType === 'touch') return;
+    const rect = preEl.getBoundingClientRect();
+    rawMouse = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    if (presence === 0) {
+      smoothX = rawMouse.x;
+      smoothY = rawMouse.y;
+    }
+    start();
+  }
+
+  heroEl.addEventListener('pointermove', onPointerMove, { passive: true });
+  heroEl.addEventListener('pointerenter', onPointerMove, { passive: true });
+  heroEl.addEventListener('pointerleave', (e) => {
+    if (e.pointerType !== 'touch') rawMouse = null;
+  }, { passive: true });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop();
+    else start();
+  });
+
+  const heroObserver = new IntersectionObserver(([entry]) => {
+    isIntersecting = entry ? entry.isIntersecting : false;
+    if (isIntersecting) start();
+    else stop();
+  }, { rootMargin: '160px 0px' });
+
+  heroObserver.observe(heroEl);
+  start();
+})();
 </script>
 
 <div id="copyToast" class="copy-toast">
