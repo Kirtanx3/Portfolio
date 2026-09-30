@@ -10,11 +10,11 @@ HTML file that ships as-is.
 
 ## Features
 
-- Custom cursor with smooth physics
-- Animated mesh-gradient background
-- Light / dark theme with auto-detection
-- Scroll-triggered reveal animations
-- Fully responsive
+- Swiss Technical Brutalism design language (electric blue & paper palette)
+- Halftone classical sculpture plates & dithered network artwork
+- Pinned navigation with active system state telemetry
+- Interactive typing headline
+- Fully responsive and zero heavy framework dependencies
 
 ## Projects Showcased
 
