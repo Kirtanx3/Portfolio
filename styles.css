@@ -1025,3 +1025,381 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
+
+
+/* ==========================================================================
+   MOBILE NAVIGATION DRAWER & RESPONSIVE COMPONENT SYSTEM
+   Tailored for Smartphones & Touchscreens (Desktop remains pixel-identical)
+   ========================================================================== */
+
+/* Mobile Hamburger Toggle (hidden on desktop) */
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--hermes-border-light);
+  cursor: pointer;
+  padding: 8px;
+  transition: all 0.2s ease;
+}
+
+.mobile-menu-toggle:hover,
+.mobile-menu-toggle:active {
+  background: var(--hermes-cyan);
+  border-color: var(--hermes-cyan);
+}
+
+.mobile-menu-toggle:hover .menu-bar,
+.mobile-menu-toggle:active .menu-bar {
+  background-color: #02031c;
+}
+
+.mobile-menu-toggle .menu-bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: var(--hermes-white);
+  transition: background-color 0.2s ease;
+}
+
+/* Mobile Drawer Overlay */
+.mobile-nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 3, 28, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-nav-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Mobile Drawer */
+.mobile-nav-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(85vw, 360px);
+  background: #020324;
+  border-left: 2px solid var(--hermes-cyan);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 20px;
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
+  overflow-y: auto;
+}
+
+.mobile-nav-drawer.active {
+  transform: translateX(0);
+}
+
+.mobile-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--hermes-border-light);
+}
+
+.mobile-drawer-brand {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 0.9;
+  color: var(--hermes-white);
+}
+
+.mobile-drawer-brand .sub-brand {
+  font-size: 13px;
+  letter-spacing: 0.25em;
+  color: var(--hermes-cyan);
+}
+
+.mobile-drawer-close {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--hermes-border-light);
+  color: var(--hermes-white);
+  font-size: 26px;
+  line-height: 1;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mobile-drawer-close:hover {
+  background: var(--hermes-cyan);
+  color: #020324;
+}
+
+.mobile-drawer-status {
+  padding: 14px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mobile-drawer-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #94a3b8;
+}
+
+.mobile-drawer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 28px 0 auto;
+}
+
+.mobile-drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+  color: var(--hermes-white);
+  transition: all 0.2s ease;
+}
+
+.mobile-drawer-link:hover,
+.mobile-drawer-link:active {
+  background: rgba(0, 240, 255, 0.1);
+  border-color: var(--hermes-cyan);
+  transform: translateX(4px);
+}
+
+.mobile-drawer-link .link-num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--hermes-cyan);
+  font-weight: 700;
+}
+
+.mobile-drawer-link .link-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex: 1;
+}
+
+.mobile-drawer-link .link-arrow {
+  color: var(--hermes-cyan);
+  font-size: 18px;
+}
+
+.mobile-drawer-footer {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--hermes-border-light);
+}
+
+.mobile-drawer-socials {
+  display: flex;
+  gap: 10px;
+}
+
+/* ==========================================================================
+   COMPREHENSIVE RESPONSIVE BREAKPOINTS (MOBILE ONLY)
+   ========================================================================== */
+
+@media (max-width: 860px) {
+  .mobile-menu-toggle {
+    display: flex;
+  }
+  .desktop-only-btn {
+    display: none !important;
+  }
+  .nav-col-right {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --hw-teams-pad-x: 18px;
+  }
+
+  /* Pinned sticky bar mobile optimization */
+  .pinned-nav {
+    padding: 6px 0;
+  }
+  .pinned-nav-inner {
+    padding: 0 16px;
+  }
+  .pinned-nav-inner > div:first-child span:first-child {
+    font-size: 18px;
+  }
+  .pinned-nav-inner .badge-status {
+    display: none;
+  }
+  .pinned-nav-links a {
+    margin-right: 12px;
+    font-size: 11px;
+  }
+
+  /* Hero Section on Mobile */
+  .hero-section {
+    padding: 24px 0 48px;
+  }
+  .hero-title {
+    font-size: clamp(38px, 9.5vw, 54px);
+    line-height: 0.95;
+  }
+  .hero-description {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .hero-actions {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  .hero-actions .hermes-btn {
+    width: 100%;
+    padding: 13px 18px;
+  }
+  .hero-art-box {
+    max-height: 380px;
+    overflow: hidden;
+    background: rgba(2, 3, 30, 0.4);
+    border: 1px solid var(--hermes-border-light);
+  }
+  .hero-statue-img {
+    max-height: 380px;
+    object-fit: cover;
+  }
+
+  /* Projects Section on Mobile */
+  .paper-section {
+    padding: 60px 0 80px;
+  }
+  .paper-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 36px;
+    padding-bottom: 16px;
+  }
+  .section-main-heading {
+    font-size: clamp(36px, 9vw, 54px);
+  }
+  .project-plate-card {
+    margin-bottom: 8px;
+  }
+  .card-art-banner {
+    height: 175px;
+  }
+  .card-body-content {
+    padding: 20px 18px;
+  }
+  .project-plate-title {
+    font-size: 32px;
+  }
+  .project-plate-desc {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .feature-checklist {
+    font-size: 13px;
+    gap: 6px;
+    margin: 16px 0;
+  }
+  .card-actions {
+    padding: 0 18px 20px 18px;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .card-actions .hermes-btn {
+    width: 100% !important;
+    padding: 12px 16px;
+  }
+
+  /* Section 02 - Philosophy on Mobile */
+  .about-section {
+    padding: 60px 0 80px;
+  }
+  .about-bio-text {
+    font-size: 16px;
+    line-height: 1.65;
+  }
+  .about-art-frame {
+    max-height: 380px;
+  }
+  .about-statue-img {
+    max-height: 380px;
+  }
+
+  /* Section 03 - Contact on Mobile */
+  .contact-section {
+    padding: 60px 0 80px;
+  }
+  .contact-card-box {
+    padding: 32px 18px;
+    box-shadow: 6px 6px 0px var(--hermes-primary);
+  }
+  .contact-title {
+    font-size: clamp(38px, 9vw, 56px);
+  }
+  .contact-text {
+    font-size: 15px;
+  }
+  .contact-button-row {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  .contact-button-row .hermes-btn {
+    width: 100%;
+    padding: 13px 16px;
+  }
+
+  /* Footer on Mobile */
+  .hermes-footer {
+    padding: 30px 0;
+    text-align: center;
+  }
+  .hermes-footer .content-container {
+    flex-direction: column;
+    gap: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 34px;
+  }
+  .pinned-nav-links {
+    display: none;
+  }
+  .pinned-nav-inner {
+    justify-content: space-between;
+  }
+}

@@ -106,5 +106,41 @@
 
   
 
+  
+  // =========================================================================
+  // MOBILE NAVIGATION DRAWER CONTROLLER
+  // =========================================================================
+  const mobileToggle = document.getElementById('mobileMenuToggle');
+  const mobileDrawer = document.getElementById('mobileNavDrawer');
+  const mobileOverlay = document.getElementById('mobileNavOverlay');
+  const mobileClose = document.getElementById('mobileDrawerClose');
+  const mobileLinks = document.querySelectorAll('[data-mobile-nav]');
+
+  function openDrawer() {
+    if (mobileDrawer && mobileOverlay) {
+      mobileDrawer.classList.add('active');
+      mobileOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeDrawer() {
+    if (mobileDrawer && mobileOverlay) {
+      mobileDrawer.classList.remove('active');
+      mobileOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+
+  if (mobileToggle) mobileToggle.addEventListener('click', openDrawer);
+  if (mobileClose) mobileClose.addEventListener('click', closeDrawer);
+  if (mobileOverlay) mobileOverlay.addEventListener('click', closeDrawer);
+
+  mobileLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      closeDrawer();
+    });
+  });
+
   console.log('KIRTAN DEVS // SYSTEM ONLINE');
 });
